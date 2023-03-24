@@ -1,4 +1,6 @@
-# REED Kalisz Website
+# OBSOLETE!
+
+## REED Kalisz Website
 
 A website with product managment included for REED.
 
