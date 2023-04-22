@@ -1,4 +1,6 @@
-# REED Kalisz Website
+# OBSOLETE!
+
+## REED Kalisz Website
 
 Product managament website for Reed Kalisz.
 
