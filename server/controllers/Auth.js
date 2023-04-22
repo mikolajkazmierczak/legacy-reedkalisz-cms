@@ -1,69 +1,53 @@
-const bcrypt = require('bcryptjs');
-const { User } = require('../models');
+import crud from '#services/crud';
+import auth from '#services/auth';
+import User from '#models/User';
 
-function startSession(req, user) {
-  req.session._id = user._id;
-  req.session.first_name = user.first_name;
-  req.session.last_name = user.last_name;
-}
+export default _ => ({
+  register: async (req, res) => {
+    try {
+      const { email, password, firstName, lastName } = req.body;
+      const user = await crud.read(User, { email });
+      if (user)
+        return res.status(409).json({ message: 'User already exists!' });
+      const salt = await auth.encryptPassword(password);
+      const newUserData = { email, password: salt, firstName, lastName };
+      await crud.create(req, User, newUserData);
+      const newUser = await crud.read(User, { email });
+      auth.startSession(req, newUser);
+      res.status(201).json({ message: 'Registered! Authenticated.' });
+    } catch (err) {
+      res.status(500).json({ error: err.toString() });
+    }
+  },
 
-exports.getUser = req => {
-  return {
-    _id: req.session._id,
-    first_name: req.session.first_name,
-    last_name: req.session.last_name,
-  };
-};
+  login: async (req, res) => {
+    try {
+      const { email, password } = req.body;
+      const user = await crud.read(User, { email }, { limit: 1 });
+      if (!user) return res.status(404).json({ error: 'User not found.' });
+      const isValid = await auth.comparePasswords(password, user);
+      if (!isValid)
+        return res.status(401).json({ error: 'Password is invalid.' });
+      auth.startSession(req, user);
+      res.status(200).json({ message: 'Logged in! Authenticated.' });
+    } catch (err) {
+      console.log(err);
+      res.status(500).json({ error: err.toString() });
+    }
+  },
 
-exports.register = (req, res) => {
-  User.findOne({ email: req.body.email }, (err, user) => {
-    if (err) return res.status(500).send({ error: err });
-    if (user) return res.status(404).send({ error: 'User already exists.' });
-    User.create(
-      {
-        email: req.body.email,
-        password: bcrypt.hashSync(req.body.password, 10),
-        first_name: req.body.first_name,
-        last_name: req.body.last_name,
-      },
-      (err, user) => {
-        if (err) return res.status(500).send({ error: err });
+  logout: (req, res) => {
+    auth.endSession(req);
+    res.json({ message: 'Logged out.' });
+  },
 
-        startSession(req, user);
-        return res.status(200).send({ message: 'Registered! Authenticated.' });
-      }
-    );
-  });
-};
-
-exports.login = (req, res) => {
-  User.findOne({ email: req.body.email }, (err, user) => {
-    if (err) return res.status(500).send({ error: err });
-    if (!user) return res.status(404).send({ error: 'No user found.' });
-
-    // check if the password is valid
-    const isPasswordValid = bcrypt.compareSync(
-      req.body.password,
-      user.password
-    );
-
-    if (!isPasswordValid)
-      return res.status(401).send({ error: 'Password is invalid.' });
-
-    startSession(req, user);
-    return res.status(200).send({ message: 'Logged in! Authenticated.' });
-  });
-};
-
-exports.logout = (req, res) => {
-  req.session.destroy();
-  return res.send({ message: 'Logged out.' });
-};
-
-exports.me = (req, res) => {
-  User.findById(req.session._id, '-password', (err, user) => {
-    if (err) return res.status(500).send({ error: err });
-    if (!user) return res.status(404).send({ error: 'No user found.' });
-    return res.status(200).send(user);
-  });
-};
+  me: async (req, res) => {
+    try {
+      const user = auth.getSession(req);
+      if (!user._id) return res.status(404).json({ error: 'User not found.' });
+      res.status(200).json(user);
+    } catch (err) {
+      res.status(500).json({ error: err.toString() });
+    }
+  },
+});

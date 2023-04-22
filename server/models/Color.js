@@ -1,9 +1,12 @@
-const mongoose = require('mongoose');
+import mongoose from 'mongoose';
+import { Timestamps, Author } from './_common.js';
 
-module.exports = mongoose.model(
+export default mongoose.model(
   'Color',
   new mongoose.Schema({
-    name: String,
-    hex: String,
+    name: { type: String, unique: true, required: true },
+    hex: { type: String, unique: true, required: true },
   })
+    .add(Timestamps)
+    .add(Author)
 );

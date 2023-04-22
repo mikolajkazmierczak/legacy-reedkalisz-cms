@@ -1,39 +1,40 @@
-require('dotenv').config();
-require('./db').connect();
-const express = require('express');
-const cors = require('cors');
-const session = require('express-session');
-const cookieParser = require('cookie-parser');
-const { DateTime } = require('luxon');
-
-const { CLIENT_ORIGIN, SESSION_SECRET_KEY } = process.env;
+import express from 'express';
+import cors from 'cors';
+import session from 'express-session';
+import cookieParser from 'cookie-parser';
+import dotenv from 'dotenv';
+import routes from './router.js';
+import { DateTime } from 'luxon';
 
 const app = express();
+
+// load environment variables
+dotenv.config();
+
+// setup cors and cookies
+const { CLIENT_ORIGIN } = process.env;
+console.log(`Accepted origin: ${CLIENT_ORIGIN}`);
 app.use(cors({ origin: CLIENT_ORIGIN, credentials: true }));
 app.use(express.json({ limit: '50mb' }));
+app.use(express.urlencoded());
 app.use(cookieParser());
 
 // Use the session middleware
+const { SESSION_SECRET_KEY } = process.env;
 const COOKIE_AGE_MS = 15 * 60 * 1000;
 app.use(
   session({
     secret: SESSION_SECRET_KEY,
     cookie: { maxAge: COOKIE_AGE_MS },
+    resave: false, // dependent on the database
+    saveUninitialized: true,
   })
 );
 
-const { verifyLogin } = require('./middleware/auth');
+app.use('/img', express.static('static'));
 
-app.get('/', verifyLogin, (req, res) => {
-  return res.send({ message: '/' });
-});
+routes(app);
 
-app.use('/auth', require('./routes/auth'));
-app.use('/user', require('./routes/user'));
-app.use('/color', require('./routes/color'));
-app.use('/product', require('./routes/product'));
-app.use('/category', require('./routes/category'));
+console.log(DateTime.now().toISO());
 
-console.log(DateTime.now().plus({ minutes: 5 }).toISO());
-
-module.exports = app;
+export default app;

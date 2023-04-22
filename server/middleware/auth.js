@@ -1,4 +1,5 @@
-exports.verifyLogin = (req, res, next) => {
+export default (req, res, next) => {
+  // verify login
   if (req.session._id) return next();
-  return res.status(401).send({ error: 'Unauthorized!' });
+  res.status(401).json({ error: 'Unauthorized!' });
 };

@@ -1,3 +1,4 @@
-**/node_modules/
-**/public/build/
-/.vscode/
+node_modules
+build
+.vscode
+.env

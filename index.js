@@ -1,10 +1,11 @@
-const http = require('http');
-const app = require('./server/app');
+import http from 'http';
+import app from './server/app.js';
+import db from './server/db.js';
 
 const server = http.createServer(app);
 
-const { PORT } = process.env;
-
+const { PORT, MONGO_URI, DB } = process.env;
+db.connect(MONGO_URI, DB);
 server.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+  console.log(`Port: ${PORT}`);
 });

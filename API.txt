@@ -1,0 +1,58 @@
+ALL
+  POST
+    /
+      body : object / array - {doc} / [{doc}]
+  GET
+    /
+      :limit : int - pagination limit
+      :offset : int - pagination offset
+      body : string / array / object - id / [ids] / {filter}
+    /:id
+  PUT
+    /
+      body : object / array - {{query}, {updates}} / [{{query}, {updates}}]
+    /:id
+      body : object - {updates}
+  DELETE
+    /
+      body : string / array / object - id / [id] / {filter}
+    /:id
+
+/users
+  POST
+    /register
+    /login
+  GET
+    /me
+    /logout
+
+/products
+  GET
+    /?limit&offset
+    /codename/:codename
+  PUT
+    /codename/:codename
+  DELETE
+    /codename/:codename
+
+/labellings
+
+/color
+
+/categories
+  GET
+    /codename/:codename
+
+/menuitems
+
+/pages
+  GET
+    /name/:name
+
+/fragments
+
+/slides
+
+/questions
+
+/emails

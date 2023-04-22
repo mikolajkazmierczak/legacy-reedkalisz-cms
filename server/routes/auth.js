@@ -1,15 +1,8 @@
-const express = require('express');
-const router = express.Router();
+import auth from '#middleware/auth';
 
-// Middleware
-const { verifyLogin } = require('../middleware/auth');
-
-// Controllers
-const Auth = require('../controllers/Auth');
-
-router.post('/register', Auth.register);
-router.post('/login', Auth.login);
-router.get('/logout', Auth.logout);
-router.get('/me', verifyLogin, Auth.me);
-
-module.exports = router;
+export default (router, _) =>
+  router
+    .post('/register', auth, _.register)
+    .post('/login', _.login)
+    .get('/logout', auth, _.logout)
+    .get('/me', auth, _.me);

@@ -1,8 +1,15 @@
-const { User } = require('../models');
+import crud from '#services/crud';
 
-exports.user = (req, res) => {
-  User.findById(req.params.id, '-password').exec((err, user) => {
-    if (err) return res.status(500).send({ error: err });
-    return res.status(200).json(user);
-  });
-};
+export default _ => ({
+  read: async (req, res) => {
+    try {
+      const { id } = req.params;
+      const docs = id
+        ? await crud.read(_, id, { limit: 1, props: '-password' })
+        : await crud.read(_, req.body.query, { all: true, props: '-password' });
+      res.status(200).json(docs);
+    } catch (err) {
+      res.status(500).json({ error: err.toString() });
+    }
+  },
+});

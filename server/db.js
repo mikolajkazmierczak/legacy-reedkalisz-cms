@@ -1,43 +1,41 @@
-const mongoose = require('mongoose');
-const bcrypt = require('bcryptjs');
-const { User } = require('./models');
+import mongoose from 'mongoose';
+import bcrypt from 'bcryptjs';
+import User from '#models/User';
 
-const prompts = require('prompts');
-
-function init() {
-  // create a user if none exists (input from console)
-  User.find().count(async (err, count) => {
-    if (!err && count == 0) {
-      const questions = [
-        { type: 'text', name: 'email', message: 'Email?' },
-        { type: 'password', name: 'password', message: 'Password?' },
-        { type: 'text', name: 'first_name', message: 'First name?' },
-        { type: 'text', name: 'last_name', message: 'Last name?' },
-      ];
-      const userInput = await prompts(questions);
-      userInput.password = bcrypt.hashSync(userInput.password, 10);
-      User.create(userInput, err => {
-        if (err) console.log('error', err);
-        else console.log(`Added "${userInput.email}" to Users collection`);
-      });
-    }
-  });
+async function createUser() {
+  const admin = {
+    email: 'admin',
+    password: bcrypt.hashSync('admin', 10),
+    firstName: 'admin',
+    lastName: 'admin',
+  };
+  await User.create(admin);
+  console.log(`Created an admin user (${admin.email}).`);
 }
 
-exports.connect = () => {
-  const { MONGO_URI } = process.env;
-  mongoose
-    .connect(MONGO_URI, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-    })
-    .then(() => {
-      console.log('Successfully connected to database');
-      init();
-    })
-    .catch(err => {
-      console.log('Failed connecting to the database. Exiting now...');
-      console.error(err);
-      process.exit(1);
-    });
+const drop = async () => {
+  const conn = mongoose.connection;
+  await conn.dropDatabase();
+  console.log(`Dropped the database!`);
+};
+
+const connect = async (uri, db, after) => {
+  const URI = uri + db;
+  try {
+    mongoose.connect(URI, { useNewUrlParser: true, useUnifiedTopology: true });
+    console.log(`Connected to the database: ${URI}`);
+    if (after) await after();
+    // create a user if none exist
+    const count = await User.estimatedDocumentCount();
+    if (count == 0) createUser();
+  } catch (err) {
+    console.log('Failed connecting to the database. Exiting now...');
+    console.error(err);
+    process.exit(1);
+  }
+};
+
+export default {
+  connect,
+  drop,
 };

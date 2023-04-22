@@ -12,12 +12,12 @@
 <style>
   button {
     cursor: pointer;
-    background-color: var(--main-1);
-    color: var(--grey-0);
+    background-color: var(--main);
+    color: var(--light);
     border: none;
     padding: 6px 7px;
   }
   button:hover {
-    background-color: var(--main-0);
+    background-color: var(--main-light);
   }
 </style>

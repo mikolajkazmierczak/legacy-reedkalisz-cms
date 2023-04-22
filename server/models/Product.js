@@ -1,33 +1,48 @@
-const mongoose = require('mongoose');
+import mongoose from 'mongoose';
+import { Timestamps, Author } from './_common.js';
 const RefObjectID = mongoose.Schema.Types.ObjectId;
-const AuthorSchema = require('./author');
-const TimestampsSchema = require('./timestamps');
 
-module.exports = mongoose.model(
+export default mongoose.model(
   'Product',
   new mongoose.Schema({
     // Publication
     published: { type: Boolean, default: false },
-    published_enable_at: Date,
-    // Main
-    title: { type: String, required: true },
-    code: { type: String, required: true, unique: true },
+    publishedEnableAt: Date,
     new: { type: Boolean, default: false },
-    new_disable_at: Date,
+    newDisableAt: Date,
+    // Main
+    name: { type: String, required: true },
+    code: { type: String, required: true, unique: true },
+    codename: { type: String, required: true },
+    description: String,
     category: {
       _id: { type: RefObjectID, ref: 'Category' },
+      name: String,
       code: String,
-      title: String,
     },
     // SEO
-    seo_title: { type: String, default: () => this.title },
-    seo_description: { type: String, default: () => this.title },
-    seo_keywords: { type: String, default: () => this.title },
+    seoTitle: { type: String, default: () => this.title },
+    seoDescription: { type: String, default: () => this.title },
+    seoKeywords: { type: String, default: () => this.title },
     // Price
-    amounts: [Number],
-    labelling: String,
+    prices: [
+      {
+        amount: Number,
+        price: Number,
+      },
+    ],
+    labelling: {
+      _id: { type: RefObjectID, ref: 'Labelling' },
+      name: String,
+      company: String,
+    },
     // Images
-    images: [String],
+    images: [
+      {
+        image: String,
+        visible: { type: Boolean, default: true },
+      },
+    ],
     // Storage
     storage: [
       {
@@ -42,9 +57,10 @@ module.exports = mongoose.model(
         image: String,
       },
     ],
-    // Description
-    description: String,
+    // Recommended
+    recommendedProducts: [{ type: RefObjectID, ref: 'Product' }],
+    recommendedCategories: [{ type: RefObjectID, ref: 'Category' }],
   })
-    .add(AuthorSchema)
-    .add(TimestampsSchema)
+    .add(Timestamps)
+    .add(Author)
 );

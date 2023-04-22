@@ -1,13 +1,21 @@
-const mongoose = require('mongoose');
+import mongoose from 'mongoose';
+import { Timestamps, Author } from './_common.js';
+const RefObjectID = mongoose.Schema.Types.ObjectId;
 
-module.exports = mongoose.model(
+export default mongoose.model(
   'Category',
   new mongoose.Schema({
-    path: { type: [Number], unique: true },
-    title: { type: String, unique: true },
-    codename: { type: String, unique: true },
+    name: { type: String, unique: true, required: true },
+    code: { type: [Number], unique: true, required: true },
+    codename: { type: String, unique: true, required: true },
+    parent: {
+      _id: { type: RefObjectID, ref: 'Category' },
+      name: String,
+      code: [Number],
+    },
     description: String,
     image: String,
-    icon: String,
   })
+    .add(Timestamps)
+    .add(Author)
 );
