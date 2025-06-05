@@ -1,8 +1,12 @@
-# OBSOLETE!
+## Legacy REED Kalisz CMS
 
-## REED Kalisz Website
+**Note:** This is a legacy project, only here for reference.
 
-Product managament website for Reed Kalisz.
+This was meant to be a product management website for Reed Kalisz, but later on a big chunk of the backend was switched out for Directus to shrink the scope of the project.
+
+Built with MongoDB and Express, plus a frontend built with SvelteKit.
+
+The project offers a structured approach to routes, models, and controllers, and the inclusion of services for common things like auth and CRUD operations. But the distinctive feature is the file-based routing system, where routes are defined by the file structure in the `server/routes` folder. It is by no means original, but nonetheless a working and quite elegant solution.
 
 # Run
 
